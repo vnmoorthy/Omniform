@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>OmniForm — Sample Result</title>
+<meta name="description" content="What an OmniForm analysis looks like — coaching script, overlay markers, Veo correction reference." />
+<style>
+  :root {
+    --bg: #05060a; --panel: #0b0e16;
+    --accent: #38f9d7; --accent2: #43e5ff; --warn: #ff5cc8;
+    --text: #e7edf3; --muted: #9ba3ad; --border: rgba(255,255,255,0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100vh; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  main { position: relative; max-width: 720px; margin: 0 auto; padding: 24px 18px 60px; }
+
+  /* Sample-mode banner */
+  .banner { background: rgba(67,229,255,0.08); border: 1px solid rgba(67,229,255,0.25); border-radius: 14px; padding: 14px 18px; margin-bottom: 22px; font-size: 13px; }
+  .banner .label { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent2); font-weight: 600; margin-bottom: 4px; }
+  .banner a { font-weight: 600; }
+
+  /* Captured frame with overlay markers */
+  .captured { position: relative; aspect-ratio: 9 / 16; max-height: 70vh; background: #000; border-radius: 18px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); margin-bottom: 14px; }
+  .captured img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .captured .gradient { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.35) 100%); pointer-events: none; }
+  .captured .scrim-text { position: absolute; bottom: 10px; left: 14px; right: 14px; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+
+  /* Coaching card */
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+  .card .label { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; font-weight: 600; margin: 0 0 8px; }
+  .card .label.coach { color: var(--accent); }
+  .card .label.ref { color: var(--accent2); }
+  .card .coaching { font-size: 16px; line-height: 1.55; margin: 0; color: rgba(255,255,255,0.92); }
+  .card .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+  .chip { font-size: 12px; padding: 4px 10px; border-radius: 999px; }
+  .chip.cyan  { background: rgba(67,229,255,0.12); color: var(--accent2); }
+  .chip.green { background: rgba(56,249,215,0.12); color: var(--accent); }
+  .chip.warn  { background: rgba(255,92,200,0.12); color: var(--warn); }
+  .chip.muted { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); }
+  .footer-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+  .footer-meta .dot { color: rgba(255,255,255,0.15); }
+
+  .visual-prompt { font-size: 12px; line-height: 1.55; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); font-style: italic; color: rgba(255,255,255,0.45); }
+
+  /* Veo reference card */
+  .ref-card { display: flex; flex-direction: column; }
+  .ref-card .frame { aspect-ratio: 9 / 16; max-height: 60vh; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); background: rgba(0,0,0,0.5); position: relative; }
+  .ref-card .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ref-card .badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 999px; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent2); backdrop-filter: blur(8px); }
+
+  /* Action row */
+  .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .cta { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 999px; font-weight: 600; font-size: 14px; cursor: pointer; transition: opacity 0.15s; border: none; }
+  .cta.primary { background: linear-gradient(120deg, var(--accent), var(--accent2)); color: #05060a; }
+  .cta.secondary { background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: var(--text); }
+  .cta:hover { opacity: 0.9; text-decoration: none; }
+
+  /* Pipeline annotation strip */
+  .pipeline { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; margin: 22px 0 14px; }
+  .pipeline .title { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .pipeline ol { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.65; color: rgba(255,255,255,0.85); }
+  .pipeline ol code { background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<main>
+
+  <div class="banner">
+    <div class="label">Sample Result · No Recording Needed</div>
+    <p style="margin:0">This page shows what users see after a real analysis — coaching text, overlay markers, and the Veo "correct-form" reference. <a href="./">▶ Try the live app on your camera</a>.</p>
+  </div>
+
+  <!-- "Your captured video" frame -->
+  <div class="captured">
+    <img src="./hero.png" alt="Captured frame: athlete mid-soccer-strike with cyan skeletal overlay, magenta warning markers on stress joints, yellow rotation arrows" />
+    <div class="gradient"></div>
+    <div class="scrim-text">Your captured clip · MediaPipe skeleton + server-computed overlay markers</div>
+  </div>
+
+  <!-- Coaching card -->
+  <div class="card">
+    <p class="label coach">Coaching Feedback</p>
+    <p class="coaching">
+      I see you doing a right-footed instep strike — your hip drives cleanly through the ball but your plant foot ankle collapses inward at impact, leaking force from the kinetic chain. Drive the outside of your plant foot into the ground and keep your knee tracking over your second toe to recover that lost power.
+    </p>
+
+    <!-- Measured metrics chips -->
+    <div class="meta">
+      <span class="chip green">L knee 120°</span>
+      <span class="chip green">R knee 140°</span>
+      <span class="chip cyan">peak 350°/s</span>
+      <span class="chip muted">measured on-device · MediaPipe BlazePose</span>
+    </div>
+
+    <!-- Overlay plan summary -->
+    <div class="meta">
+      <span class="chip warn">⚠ leftAnkle · Power leak at plant</span>
+      <span class="chip cyan">◉ rightKnee · 140° extension</span>
+      <span class="chip green">→ leftHip · Rotation vector</span>
+    </div>
+
+    <p class="visual-prompt">
+      Overlay plan: glowing cyan vector lines trace the hip, knee, and ankle joints; a pulsing magenta ring marks the collapsing plant ankle; a yellow rotational vector tracks hip drive through the strike.
+    </p>
+
+    <div class="footer-meta">
+      <span>gemini-3.5-flash</span>
+      <span class="dot">·</span>
+      <span>adk director agent</span>
+      <span class="dot">·</span>
+      <span>13.7s</span>
+      <span class="dot">·</span>
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:0;text-transform:none">UID 72ae5a1f</span>
+    </div>
+  </div>
+
+  <!-- Veo correction reference card -->
+  <div class="card ref-card">
+    <p class="label ref">Correct-Form Reference · Veo 3.1 Image-to-Video</p>
+    <div class="frame">
+      <img src="./architecture.png" alt="Reference image: athlete demonstrating the corrected technique — neutral knee tracking, stable plant foot, smooth hip rotation through the strike" />
+      <div class="badge">Imagen 4 Ultra sample · 8s in production</div>
+    </div>
+    <p style="font-size:12px;color:rgba(255,255,255,0.5);margin:10px 2px 0;line-height:1.55">
+      In the live app, Veo 3.1 Fast takes the first frame of your captured clip as the reference image and animates an ~8-second slow-motion video of <strong>you</strong>, in <strong>your setting</strong>, executing the corrected technique. The image above stands in for that video on this static page.
+    </p>
+  </div>
+
+  <!-- Pipeline annotation for judges -->
+  <div class="pipeline">
+    <div class="title">What's happening behind this screen</div>
+    <ol>
+      <li>Frontend uploads the 4-second clip + measured MediaPipe metrics to <code>ai.models.generateContent</code> on <strong>Gemini 3.5 Flash</strong> with a Zod-validated <code>responseSchema</code>.</li>
+      <li>An <strong>ADK Director Agent</strong> consumes the multimodal output and emits the four-field JSON above: <code>agentAudioScript</code>, <code>omniVideoPrompt</code>, <code>overlayPlan</code>, <code>correctionVideoPrompt</code>.</li>
+      <li>The script is voiced by <strong>Cloud Text-to-Speech · Chirp 3 HD</strong> (en-US-Chirp3-HD-Charon).</li>
+      <li>The captured clip's first frame is sent to <strong>Veo 3.1 Fast</strong> via <code>ai.models.generateVideos</code> as the I2V reference — produces an 8-second mp4 of the same athlete performing the correction.</li>
+      <li>If Veo is unavailable, <strong>Imagen 4 Ultra</strong> generates a still image of the corrected form as the fallback (also via <code>@google/genai</code>).</li>
+    </ol>
+  </div>
+
+  <div class="actions">
+    <a class="cta primary" href="./">▶ Open the live app</a>
+    <a class="cta secondary" href="./about.html">See architecture</a>
+    <a class="cta secondary" href="https://github.com/vnmoorthy/Omniform">Source on GitHub</a>
+  </div>
+
+</main>
+
+</body>
+</html>
