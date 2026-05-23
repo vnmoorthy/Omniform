@@ -22,7 +22,10 @@
 // (with the key) and serve the mp4 via /public/corrections/{id}.mp4.
 // ---------------------------------------------------------------------------
 
+// Model preference order. Stable tags first, preview tags as backup since
+// preview channels can be deprecated without notice.
 const VEO_MODEL_FALLBACK_ORDER = [
+  "veo-3.1-fast-generate-001",
   "veo-3.1-fast-generate-preview",
   "veo-3.0-generate-001",
   "veo-2.0-generate-001",
