@@ -28,3 +28,6 @@ backend/data/*.jsonl
 # OS / logs
 *.log
 .DS_Store
+
+# Office app lock files (PowerPoint open-file markers)
+~$*
