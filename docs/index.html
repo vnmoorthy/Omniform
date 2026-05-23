@@ -188,8 +188,10 @@ Motion</button>
   // Configuration — API keys embedded for the live demo.
   // The hackathon owner accepted this risk; rotate after the event.
   // ============================================================
-  const GEMINI_API_KEY = "AIzaSyDuIDYg3asfdeJzTLZq56a5PQeMrHhNjHc";
-  const TTS_API_KEY    = "AIzaSyBMa3vDcoIEoo8mjKcUoOmC9sv83H0anbs";
+  // Restricted key — only valid when called from https://vnmoorthy.github.io/*
+  // (HTTP referrer restriction applied in GCP). Both Gemini + TTS enabled.
+  const GEMINI_API_KEY = "AIzaSyBD46iy7ZPGoGXZu07XdBw7wkSlB6JEQfU";
+  const TTS_API_KEY    = "AIzaSyBD46iy7ZPGoGXZu07XdBw7wkSlB6JEQfU";
   const MODEL = "gemini-3.5-flash";
   // Verified working models first. The "-001" stable tag for veo-3.1-fast
   // returns 404 on the public Gemini API as of this build; preview is what's
