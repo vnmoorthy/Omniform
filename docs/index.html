@@ -755,7 +755,10 @@ Output ONLY the JSON object. No markdown fences, no commentary.`;
             numberOfVideos: 1,
             durationSeconds: 8,
             aspectRatio: "9:16",
-            personGeneration: "allow_adult",
+            // personGeneration omitted: the Veo API on this project rejects
+            // "allow_adult" with "currently not supported". Omitting lets
+            // the server pick its default policy, which still renders the
+            // person in the reference frame.
             negativePrompt: "text overlays, captions, watermarks, blurry, distorted anatomy",
           },
         });
@@ -854,7 +857,8 @@ Output ONLY the JSON object. No markdown fences, no commentary.`;
         const resp = await ai.models.generateImages({
           model: m,
           prompt: stillPrompt,
-          config: { numberOfImages: 1, aspectRatio: "9:16", personGeneration: "allow_adult" },
+          // personGeneration omitted (see Veo note above)
+          config: { numberOfImages: 1, aspectRatio: "9:16" },
         });
         imgB64 = resp.generatedImages?.[0]?.image?.imageBytes;
         if (imgB64) { acceptedModel = m; break; }

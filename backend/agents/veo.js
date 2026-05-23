@@ -56,10 +56,10 @@ function buildVeoParams({ model, prompt, referenceImageBytes, referenceMime }) {
       numberOfVideos: 1,
       durationSeconds: 8,
       aspectRatio: "9:16", // phone-first; matches the OmniForm UI
-      // For I2V we MUST allow person generation, otherwise Veo strips the
-      // person out of the reference frame. For T2V we still allow adults so
-      // the generated clip can include an athlete.
-      personGeneration: "allow_adult",
+      // personGeneration omitted: the Veo API rejects "allow_adult" with
+      // "currently not supported" as of 2026-05-22. Omitting lets the
+      // server pick its default, which preserves the person from the I2V
+      // reference frame. Restore "allow_adult" if Google re-enables it.
       negativePrompt:
         "text overlays, captions, watermarks, blurry, distorted anatomy, chaotic crowds, duplicated limbs",
     },
