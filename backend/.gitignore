@@ -1,0 +1,13 @@
+node_modules
+.env
+.env.*
+!.env.example
+public/videos/*
+!public/videos/.gitkeep
+public/audio/*
+!public/audio/.gitkeep
+public/corrections/*
+!public/corrections/.gitkeep
+data/*.jsonl
+*.log
+.DS_Store

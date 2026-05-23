@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.env
+.env.*
+!.env.example
+public/videos/*
+!public/videos/.gitkeep
+.git
+.gitignore
+Dockerfile
+.dockerignore
+*.md

@@ -1,0 +1,23 @@
+{
+  "name": "omniform-backend",
+  "version": "1.0.0",
+  "description": "OmniForm Ambient Biomechanics Lab - analysis API (Express + Google Gen AI / Gemini)",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@google/adk": "^1.1.0",
+    "@google/genai": "^2.6.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "multer": "^2.1.1",
+    "zod": "^4.4.3"
+  }
+}

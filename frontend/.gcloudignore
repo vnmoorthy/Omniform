@@ -1,0 +1,11 @@
+# Files not uploaded to Cloud Build / Cloud Run source deploys
+node_modules
+.next
+out
+build
+.git
+.gitignore
+.env*.local
+npm-debug.log
+*.log
+.DS_Store

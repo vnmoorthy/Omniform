@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------------------
+# OmniForm — root ignore. Keeps secrets, build output, and assistant/dev
+# tooling out of the repository judges will see.
+# ---------------------------------------------------------------------------
+
+# Dependencies & build output
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Secrets / local env (keep the *.example templates)
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# Backend runtime artifacts
+backend/public/audio/*
+backend/public/videos/*
+!backend/public/**/.gitkeep
+backend/data/*.jsonl
+
+# Local-only authoring scratch directories
+.agents/
+
+# OS / logs
+*.log
+.DS_Store
