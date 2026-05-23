@@ -11,19 +11,6 @@
 
 ---
 
-## Team & Contributors
-
-| Name | Role |
-| --- | --- |
-| Moorthy (vnarasingamoorthy@gmail.com) | Full-stack / AI |
-| _Add teammate_ | _role_ |
-| _Add teammate_ | _role_ |
-
-> Update this table with every team member before submitting — the hackathon
-> requires all contributors to be listed here.
-
----
-
 ## The Problem
 
 Most "AI coaching" is a chat box: you type, it types back. That breaks down for
