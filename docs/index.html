@@ -166,6 +166,8 @@
           </div>
         </div>
         <video id="refVideo" class="hidden" controls autoplay loop muted playsinline></video>
+        <img id="refImg" class="hidden" alt="Imagen-generated corrected-form still" />
+        <p id="refCaption" class="hidden" style="font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-top: 8px;"></p>
       </div>
       <div class="actions">
         <button id="replayBtn">Replay Audio</button>
@@ -189,11 +191,21 @@ Motion</button>
   const GEMINI_API_KEY = "AIzaSyDuIDYg3asfdeJzTLZq56a5PQeMrHhNjHc";
   const TTS_API_KEY    = "AIzaSyBMa3vDcoIEoo8mjKcUoOmC9sv83H0anbs";
   const MODEL = "gemini-3.5-flash";
+  // Verified working models first. The "-001" stable tag for veo-3.1-fast
+  // returns 404 on the public Gemini API as of this build; preview is what's
+  // actually available. Order matters — first match wins.
   const VEO_MODELS = [
-    "veo-3.1-fast-generate-001",
     "veo-3.1-fast-generate-preview",
     "veo-3.0-generate-001",
     "veo-2.0-generate-001",
+  ];
+  // Imagen fallback model for when Veo can't produce a video (quota, RAI,
+  // model not enabled on the project). Static "corrected form" still image
+  // is a worse-but-still-Google-AI output rather than a blank error.
+  const IMAGEN_MODELS = [
+    "imagen-4.0-ultra-generate-001",
+    "imagen-4.0-generate-001",
+    "imagen-3.0-generate-002",
   ];
   const TTS_VOICE = "en-US-Chirp3-HD-Charon";
   const RECORD_MS = 4000;
@@ -225,6 +237,7 @@ Motion</button>
   const visualPrompt = $("visualPrompt");
   const pipelineMeta = $("pipelineMeta");
   const refTile = $("refTile"); const refStatus = $("refStatus"); const refStatusText = $("refStatusText"); const refStatusSub = $("refStatusSub"); const refVideo = $("refVideo");
+  const refImg = $("refImg"); const refCaption = $("refCaption");
 
   $("errorClose").addEventListener("click", () => errorToast.classList.add("hidden"));
   $("replayBtn").addEventListener("click", () => { if (currentResult) playCoaching(currentResult); });
@@ -569,7 +582,28 @@ Motion</button>
     required: ["agentAudioScript","omniVideoPrompt","overlayPlan","correctionVideoPrompt"],
   };
 
-  const SYSTEM_INSTRUCTION = `You are a human-movement biomechanics engine. Analyze the attached video clip of a person moving — this could be any activity (sport skill, gait, posture, lift, rehab/PT). Detect what movement is being performed, then assess kinetic-chain quality for that movement. Produce a JSON object with: agentAudioScript (1-2 sentences of authoritative coaching addressed to the athlete — reference measured numbers verbatim when present), omniVideoPrompt (description of how an overlay should emphasize joint highlights, ≤80 words), overlayPlan (2-5 entries each with joint ∈ {leftHip,rightHip,leftKnee,rightKnee,leftAnkle,rightAnkle}, treatment ∈ {highlight,warning,vector}, color ∈ {cyan,magenta,yellow}, optional label ≤40 chars — use warning+magenta for asymmetries, highlight+cyan for measured markers, vector+yellow for force/velocity), correctionVideoPrompt (30-150 word Veo image-to-video prompt opening "The same person from the reference frame performs the corrected [activity]: ..." describing the specific corrected biomechanics, cinematic side-profile slow-motion, no text overlays).`;
+  const SYSTEM_INSTRUCTION = `You are a human-movement biomechanics engine. Analyze the attached video clip of a person moving. The activity can be anything: a sport skill (soccer, golf, basketball, tennis, lifting), a gait pattern (walking, running, climbing), a posture (sitting, standing, reaching), or a rehab/PT movement. Watch carefully and identify what you see.
+
+Produce a JSON object with EXACTLY these four fields:
+
+1. "agentAudioScript" (2-4 sentences, 60-300 chars total):
+   - MUST OPEN with "I see you doing X" or "Your X shows..." where X NAMES the specific activity you observed (e.g. "your squat descent", "your walking gait", "your overhead press"). This proves you actually watched the video.
+   - Then identify ONE concrete actionable flaw you observed (e.g. "your left knee tracks inward past the ankle", "your stride length favors the right side", "your shoulders elevate during the push").
+   - Then give a SPECIFIC correction the person should do next time (e.g. "drive your knees outward to track over your second toe", "lengthen your right step to match the left", "actively pull your shoulders down before pressing").
+   Refer to any measured numbers verbatim when provided.
+
+2. "omniVideoPrompt" (string, ≤80 words): how the canvas overlay should visually emphasize the flaw on the user's video — describe glowing vector lines on the flagged joints.
+
+3. "overlayPlan" (array of 2-5 entries):
+   { joint: "leftHip"|"rightHip"|"leftKnee"|"rightKnee"|"leftAnkle"|"rightAnkle",
+     treatment: "highlight"|"warning"|"vector",
+     color: "cyan"|"magenta"|"yellow",
+     label?: string (≤40 chars) }
+   Use warning+magenta on the joint(s) with the flaw, highlight+cyan on the joints carrying the measured numbers, vector+yellow on the joint(s) driving the corrective motion.
+
+4. "correctionVideoPrompt" (string, 60-200 words): a Veo image-to-video prompt for an ~8-second clip animating the SAME person in the SAME setting (the first frame is the reference image) performing the same activity correctly. Open with "The same person from the reference frame performs the corrected [activity name]:". Describe in plain physical terms what their body does differently — joint positions, sequencing, balance — to fix the flaw. Cinematic side-profile, smooth slow-motion, instructional tone. EXPLICITLY include "no text overlays, no captions, no watermarks".
+
+Output ONLY the JSON object. No markdown fences, no commentary.`;
 
   async function runAnalysis(videoBlob, measured) {
     captureBtn.disabled = true; captureHint.textContent = "Processing…";
@@ -600,7 +634,12 @@ Motion</button>
     } catch (err) {
       console.error("[OmniForm] analyze error", err);
       clearLoading();
-      showError("Gemini analyze call failed. Check your network or quota and try again.");
+      // Surface the actual Gemini error message so it's debuggable. Common
+      // causes: video too large (try a shorter clip), quota exhausted, key
+      // restrictions, or the API rejecting the schema.
+      const msg = err?.message || String(err);
+      const short = msg.length > 300 ? msg.slice(0, 280) + "…" : msg;
+      showError("Gemini analyze failed: " + short);
       captureBtn.disabled = false; captureHint.textContent = "Hold to capture · Release to analyze";
       return;
     }
@@ -620,9 +659,13 @@ Motion</button>
     playCoaching(result);
 
     // Veo I2V (async, polls in background and updates the tile)
-    kickoffVeo(result.correctionVideoPrompt, firstFrameDataUrl).catch((err) => {
-      console.warn("[OmniForm] Veo failed", err);
-      showRefError(err?.message || String(err));
+    kickoffVeo(result.correctionVideoPrompt, firstFrameDataUrl).catch(async (err) => {
+      console.warn("[OmniForm] Veo threw, falling back to Imagen still", err);
+      try {
+        await imagenFallback(result.correctionVideoPrompt, "Veo error · Imagen 4 still");
+      } catch (err2) {
+        showRefError(err?.message || String(err));
+      }
     });
   }
 
@@ -670,6 +713,8 @@ Motion</button>
     refTile.classList.remove("hidden");
     refStatus.classList.remove("hidden");
     refVideo.classList.add("hidden");
+    refImg.classList.add("hidden");
+    refCaption.classList.add("hidden");
     refStatusText.textContent = "Generating reference clip of the corrected technique…";
 
     resultEl.classList.remove("hidden");
@@ -725,7 +770,8 @@ Motion</button>
     }
     if (!operation) {
       clearInterval(tickHandle);
-      showRefError(lastErr?.message || "No Veo model accepted the request");
+      console.warn("[OmniForm] All Veo models failed — falling back to Imagen still", lastErr);
+      await imagenFallback(prompt, "Veo unavailable on this project · Imagen 4 still");
       return;
     }
     refStatusSub.textContent = `${acceptedModel} · 0s elapsed`;
@@ -744,35 +790,112 @@ Motion</button>
 
     const r = fresh.response;
     if (r?.raiMediaFilteredCount > 0) {
-      showRefError(`Veo RAI filter blocked the generation: ${(r.raiMediaFilteredReasons || []).join("; ") || "no reason"}`);
+      console.warn("[OmniForm] Veo RAI-filtered, falling back to Imagen still");
+      await imagenFallback(prompt, `Veo blocked by safety filter · Imagen 4 still`);
       return;
     }
     const generated = r?.generatedVideos?.[0]?.video;
     const inlineB64 = generated?.videoBytes;
     const uri = generated?.uri;
-    if (!inlineB64 && !uri) { showRefError("Veo finished but returned no video payload"); return; }
+    if (!inlineB64 && !uri) {
+      await imagenFallback(prompt, "Veo returned no payload · Imagen 4 still");
+      return;
+    }
 
     let videoUrl;
-    if (inlineB64) {
-      const bytes = Uint8Array.from(atob(inlineB64), (c) => c.charCodeAt(0));
-      videoUrl = URL.createObjectURL(new Blob([bytes], { type: generated.mimeType || "video/mp4" }));
-    } else {
-      // Fetch the Gemini Files URI with the API key (browser can authenticate via ?key=)
-      const sep = uri.includes("?") ? "&" : "?";
-      const r2 = await fetch(`${uri}${sep}key=${encodeURIComponent(GEMINI_API_KEY)}`);
-      if (!r2.ok) { showRefError(`Veo URI fetch ${r2.status}`); return; }
-      const blob = await r2.blob();
-      videoUrl = URL.createObjectURL(blob);
+    try {
+      if (inlineB64) {
+        const bytes = Uint8Array.from(atob(inlineB64), (c) => c.charCodeAt(0));
+        videoUrl = URL.createObjectURL(new Blob([bytes], { type: generated.mimeType || "video/mp4" }));
+      } else {
+        // Fetch the Gemini Files URI with the API key (browser auths via ?key=)
+        const sep = uri.includes("?") ? "&" : "?";
+        const r2 = await fetch(`${uri}${sep}key=${encodeURIComponent(GEMINI_API_KEY)}`);
+        if (!r2.ok) throw new Error(`Veo URI fetch ${r2.status}`);
+        const blob = await r2.blob();
+        videoUrl = URL.createObjectURL(blob);
+      }
+    } catch (err) {
+      console.warn("[OmniForm] Veo download failed, falling back to Imagen", err);
+      await imagenFallback(prompt, `Veo download failed · Imagen 4 still`);
+      return;
     }
 
     refStatus.classList.add("hidden");
+    refImg.classList.add("hidden");
+    refCaption.classList.add("hidden");
     refVideo.src = videoUrl;
     refVideo.classList.remove("hidden");
   }
+
+  // ============================================================
+  // Imagen fallback — when Veo can't produce a video, generate a single
+  // "this is what the corrected form looks like" still image via Imagen 4.
+  // Same @google/genai SDK, just ai.models.generateImages() instead of
+  // ai.models.generateVideos(). Strictly worse than video but always works.
+  // ============================================================
+  async function imagenFallback(prompt, caption) {
+    // Tighter prompt — Imagen does worse with long narratives, better with
+    // composed scene descriptions. Strip "image-to-video" framing.
+    const stillPrompt =
+      prompt
+        .replace(/^The same person from the reference frame performs the corrected[^:]*:?\s*/i,
+                 "A person demonstrating the corrected form: ")
+        .replace(/cinematic side-profile,?\s*smooth slow-motion,?\s*instructional tone\.?/gi,
+                 "Cinematic side-profile photography, athletic lighting.")
+        .replace(/no text overlays,?\s*no captions,?\s*no watermarks\.?/gi, "") +
+      " Hyper-detailed photo, no text, no captions, no watermarks.";
+
+    let imgB64 = null;
+    let acceptedModel = null;
+    let lastErr;
+    for (const m of IMAGEN_MODELS) {
+      try {
+        const resp = await ai.models.generateImages({
+          model: m,
+          prompt: stillPrompt,
+          config: { numberOfImages: 1, aspectRatio: "9:16", personGeneration: "allow_adult" },
+        });
+        imgB64 = resp.generatedImages?.[0]?.image?.imageBytes;
+        if (imgB64) { acceptedModel = m; break; }
+      } catch (err) {
+        lastErr = err;
+        if (!/model|not found|unsupported|invalid|preview|denied/i.test(err?.message || "")) {
+          // Hard error (auth, quota) — surface it
+          showRefError(`Imagen fallback failed: ${err?.message || String(err)}`);
+          return;
+        }
+      }
+    }
+    if (!imgB64) {
+      showRefError(`Imagen fallback: no model accepted. ${lastErr?.message || ""}`);
+      return;
+    }
+    const bytes = Uint8Array.from(atob(imgB64), (c) => c.charCodeAt(0));
+    const blob = new Blob([bytes], { type: "image/png" });
+    const url = URL.createObjectURL(blob);
+    refStatus.classList.add("hidden");
+    refVideo.classList.add("hidden");
+    refImg.src = url;
+    refImg.classList.remove("hidden");
+    refImg.style.width = "100%";
+    refImg.style.aspectRatio = "9 / 16";
+    refImg.style.maxHeight = "320px";
+    refImg.style.borderRadius = "10px";
+    refImg.style.border = "1px solid var(--border)";
+    refImg.style.objectFit = "contain";
+    refImg.style.background = "rgba(0,0,0,0.5)";
+    refImg.style.marginTop = "8px";
+    refCaption.textContent = `${caption} · ${acceptedModel}`;
+    refCaption.classList.remove("hidden");
+  }
+
   function showRefError(msg) {
-    refStatus.innerHTML = `<div class="text" style="color:#ffd1d1">Reference clip unavailable: ${msg}</div>`;
+    refStatus.innerHTML = `<div class="text" style="color:#ffd1d1">Reference unavailable: ${msg}</div>`;
     refStatus.classList.remove("hidden");
     refVideo.classList.add("hidden");
+    refImg.classList.add("hidden");
+    refCaption.classList.add("hidden");
   }
 
   // ============================================================
@@ -816,11 +939,15 @@ Motion</button>
     if (currentAudio) { try { currentAudio.pause(); } catch {} currentAudio = null; }
     if (currentResult?.videoUrl) URL.revokeObjectURL(currentResult.videoUrl);
     if (refVideo.src?.startsWith("blob:")) URL.revokeObjectURL(refVideo.src);
+    if (refImg.src?.startsWith("blob:")) URL.revokeObjectURL(refImg.src);
     currentResult = null;
     activeOverlayPlan = [];
     overlayMode = "live";
     resultEl.classList.add("hidden");
     refTile.classList.add("hidden");
+    refVideo.classList.add("hidden");
+    refImg.classList.add("hidden");
+    refCaption.classList.add("hidden");
     refStatusSub.textContent = "Veo typically takes 30–60s · 0s elapsed";
     captureBtn.disabled = false;
     captureBtn.classList.remove("hidden");
