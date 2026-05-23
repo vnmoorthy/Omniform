@@ -188,10 +188,13 @@ Motion</button>
   // Configuration — API keys embedded for the live demo.
   // The hackathon owner accepted this risk; rotate after the event.
   // ============================================================
-  // Restricted key — only valid when called from https://vnmoorthy.github.io/*
-  // (HTTP referrer restriction applied in GCP). Both Gemini + TTS enabled.
-  const GEMINI_API_KEY = "AIzaSyBD46iy7ZPGoGXZu07XdBw7wkSlB6JEQfU";
-  const TTS_API_KEY    = "AIzaSyBD46iy7ZPGoGXZu07XdBw7wkSlB6JEQfU";
+  // Restricted key — confirm in GCP console that BOTH are set:
+  //   Application restriction: HTTP referrer https://vnmoorthy.github.io/*
+  //   API restriction:         Generative Language API + Cloud Text-to-Speech
+  // The HTTP referrer restriction is what prevents Google's secret-scanner
+  // from auto-revoking the key when it appears in this public repo.
+  const GEMINI_API_KEY = "AIzaSyDslIUIoDacI3EC9X3vF6pUX4oi2ZUgJ7w";
+  const TTS_API_KEY    = "AIzaSyDslIUIoDacI3EC9X3vF6pUX4oi2ZUgJ7w";
   const MODEL = "gemini-3.5-flash";
   // Verified working models first. The "-001" stable tag for veo-3.1-fast
   // returns 404 on the public Gemini API as of this build; preview is what's
