@@ -4,206 +4,848 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>OmniForm — Ambient Biomechanics Lab</title>
-<meta name="description" content="Hold-to-capture athletic motion analysis. Gemini 3.5 Flash + Google ADK + Veo 3.1 image-to-video. Camera-and-button UX, no text input, instant kinematic coaching with a generated reference clip of the corrected technique." />
-<meta property="og:title" content="OmniForm — Ambient Biomechanics Lab" />
-<meta property="og:description" content="Real-time human-movement coaching. Gemini 3.5 Flash + Google ADK + Veo 3.1." />
+<meta name="description" content="Real-time human-movement coaching. Gemini 3.5 Flash + Veo 3.1 image-to-video + Chirp 3 HD. Camera-and-button UX." />
 <style>
   :root {
-    --bg: #05060a;
-    --panel: #0b0e16;
-    --accent: #38f9d7;
-    --accent2: #43e5ff;
-    --warn: #ff5cc8;
-    --text: #e7edf3;
-    --muted: #9ba3ad;
-    --border: rgba(255,255,255,0.08);
+    --bg: #05060a; --panel: #0b0e16;
+    --accent: #38f9d7; --accent2: #43e5ff; --warn: #ff5cc8;
+    --text: #e7edf3; --muted: #9ba3ad; --border: rgba(255,255,255,0.08);
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; line-height: 1.55; }
-  a { color: var(--accent2); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-  pre { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
-  code { background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; font-size: 0.92em; }
-  pre code { background: transparent; padding: 0; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 28px 22px 80px; }
-  header { display: flex; flex-direction: column; align-items: center; padding: 56px 22px 28px; text-align: center; }
-  .eyebrow { font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
-  h1 { font-size: clamp(34px, 6vw, 56px); margin: 14px 0 8px; font-weight: 700; letter-spacing: -0.02em; background: linear-gradient(120deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .tag { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }
-  .lede { max-width: 640px; margin: 22px auto 8px; font-size: 17px; color: var(--text); opacity: 0.92; }
-  .pill-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 22px; }
-  .pill { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); border: 1px solid rgba(56,249,215,0.4); background: rgba(56,249,215,0.06); padding: 6px 12px; border-radius: 999px; }
-  .cta { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 999px; font-weight: 600; font-size: 14px; margin: 8px 4px; transition: opacity .15s; }
-  .cta.primary { background: linear-gradient(120deg, var(--accent), var(--accent2)); color: #05060a; }
-  .cta.secondary { background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: var(--text); }
-  .cta:hover { opacity: 0.9; text-decoration: none; }
-  section { padding: 40px 0; border-top: 1px solid var(--border); }
-  h2 { font-size: 22px; margin: 0 0 14px; font-weight: 600; letter-spacing: -0.01em; }
-  h3 { font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 24px 0 8px; }
-  p { color: var(--text); opacity: 0.86; margin: 0 0 12px; }
-  ul { margin: 0 0 12px; padding-left: 20px; color: var(--text); opacity: 0.88; }
-  ul li { margin-bottom: 6px; }
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin-top: 14px; }
-  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
-  .card .h { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
-  .card p { font-size: 14px; margin: 0; opacity: 0.85; }
-  .arch { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; font-size: 12px; line-height: 1.5; white-space: pre; overflow-x: auto; color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-  .demo-note { background: rgba(67, 229, 255, 0.06); border: 1px solid rgba(67, 229, 255, 0.25); border-radius: 12px; padding: 14px 16px; font-size: 14px; }
-  footer { padding: 32px 0 12px; text-align: center; color: var(--muted); font-size: 12px; }
-  footer a { color: var(--muted); }
-  table.specs { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 14px; }
-  table.specs td { padding: 8px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
-  table.specs td:first-child { color: var(--muted); width: 38%; padding-right: 14px; font-size: 13px; }
+  html, body { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; overflow: hidden; }
+  main { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+  .hidden { display: none !important; }
+
+  /* Live camera layer */
+  #webcam { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+  #overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .vignette { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent 25%, transparent 70%, rgba(0,0,0,0.75)); pointer-events: none; }
+
+  /* Header */
+  .header { position: absolute; top: 32px; left: 0; right: 0; display: flex; flex-direction: column; align-items: center; pointer-events: none; z-index: 5; }
+  .header h1 { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.4em; text-transform: uppercase; color: var(--accent); }
+  .header p { margin: 4px 0 0; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+
+  /* HUD with measured angles */
+  #hud { position: absolute; right: 16px; top: 80px; z-index: 20; background: rgba(0,0,0,0.45); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; backdrop-filter: blur(8px); text-align: right; pointer-events: none; }
+  #hud .label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  #hud .row { font-size: 12px; color: rgba(255,255,255,0.85); }
+
+  /* Welcome tip */
+  #welcome { position: absolute; left: 50%; top: 32%; transform: translateX(-50%); z-index: 10; max-width: 360px; padding: 18px 22px; background: rgba(0,0,0,0.55); border: 1px solid var(--border); border-radius: 16px; backdrop-filter: blur(10px); text-align: center; pointer-events: none; }
+  #welcome .title { font-size: 14px; font-weight: 600; color: var(--accent); margin: 0 0 6px; }
+  #welcome p { font-size: 13px; margin: 0; color: rgba(255,255,255,0.85); line-height: 1.5; }
+
+  /* Recording badge */
+  #recBadge { position: absolute; left: 0; right: 0; top: 100px; z-index: 20; display: flex; justify-content: center; }
+  #recBadge .pill { display: flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 999px; background: rgba(255,80,80,0.2); backdrop-filter: blur(8px); color: #ffd1d1; font-size: 14px; font-weight: 500; }
+  #recBadge .dot { width: 10px; height: 10px; border-radius: 50%; background: #ff5050; animation: ping 1s ease-out infinite; }
+  @keyframes ping { 0% { transform: scale(0.7); opacity: 1; } 100% { transform: scale(1.3); opacity: 0.3; } }
+
+  /* Error toast */
+  #errorToast { position: absolute; left: 50%; top: 28%; transform: translateX(-50%); z-index: 40; max-width: 420px; display: flex; gap: 12px; padding: 12px 18px; background: rgba(80, 10, 10, 0.85); border: 1px solid rgba(255,80,80,0.4); border-radius: 14px; backdrop-filter: blur(10px); color: #ffd1d1; font-size: 14px; }
+  #errorToast button { background: none; border: none; color: rgba(255,200,200,0.7); font-size: 18px; cursor: pointer; padding: 0 4px; }
+
+  /* Loading overlay */
+  #loading { position: absolute; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; background: rgba(0,0,0,0.85); backdrop-filter: blur(14px); }
+  .swarm { width: 80px; height: 80px; border-radius: 50%; border: 3px solid rgba(56,249,215,0.15); border-top-color: var(--accent); animation: spin 1s linear infinite; }
+  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  #stageBlock { width: 80%; max-width: 360px; text-align: center; }
+  #stageTitle { background: linear-gradient(120deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 18px; font-weight: 600; margin: 0 0 6px; }
+  #stageSubtitle { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin: 0; }
+  #stageBar { height: 4px; width: 100%; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden; margin-top: 20px; }
+  #stageBar > div { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); width: 25%; transition: width 0.7s ease; }
+  #stageTicker { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-top: 16px; }
+  #stageTicker .on { color: var(--accent); }
+
+  /* Result screen */
+  #result { position: absolute; inset: 0; z-index: 30; background: var(--bg); display: flex; flex-direction: column; }
+  #resultVideoWrap { position: absolute; inset: 0; }
+  #resultVideo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #resultOverlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #resultGradient { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.5)); pointer-events: none; }
+  #resultPanel { position: relative; z-index: 10; margin-top: auto; padding: 24px 22px 36px; display: flex; flex-direction: column; gap: 16px; }
+  .card { background: rgba(0,0,0,0.55); border: 1px solid var(--border); border-radius: 16px; padding: 18px; backdrop-filter: blur(10px); }
+  .card .label { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin: 0 0 8px; }
+  .card .coaching { font-size: 16px; line-height: 1.55; margin: 0; color: rgba(255,255,255,0.92); }
+  .card .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
+  .chip { background: rgba(56,249,215,0.12); color: var(--accent); padding: 4px 10px; border-radius: 999px; font-size: 12px; }
+  .chip.warn { background: rgba(255,92,200,0.12); color: var(--warn); }
+
+  /* Veo reference video */
+  #refTile .label { color: var(--accent2); }
+  #refTile video { width: 100%; aspect-ratio: 9 / 16; max-height: 320px; border-radius: 10px; border: 1px solid var(--border); background: rgba(0,0,0,0.5); object-fit: contain; margin-top: 8px; }
+  #refStatus { display: flex; align-items: center; gap: 12px; }
+  #refSpinner { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(67,229,255,0.15); border-top-color: var(--accent2); animation: spin 1s linear infinite; flex-shrink: 0; }
+  #refStatus .text { font-size: 13px; color: rgba(255,255,255,0.75); }
+  #refStatus .sub { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-top: 4px; }
+
+  /* Action row */
+  .actions { display: flex; gap: 10px; justify-content: center; align-items: center; }
+  .actions button { font-size: 14px; font-weight: 600; padding: 10px 22px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,0.08); color: var(--text); cursor: pointer; }
+  .actions button.primary { background: linear-gradient(120deg, var(--accent), var(--accent2)); color: #05060a; border: none; }
+  .actions button:hover { opacity: 0.9; }
+
+  /* Capture button */
+  #captureBtn { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); width: 96px; height: 96px; border-radius: 50%; border: none; cursor: pointer; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #05060a; font-size: 12px; font-weight: 700; line-height: 1.15; letter-spacing: 0.05em; text-transform: uppercase; white-space: pre-line; touch-action: none; user-select: none; box-shadow: 0 0 40px rgba(56,249,215,0.4); transition: transform 0.15s ease; z-index: 30; }
+  #captureBtn:active, #captureBtn.recording { transform: translateX(-50%) scale(1.1); box-shadow: 0 0 60px rgba(56,249,215,0.7); }
+  #captureBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #captureHint { position: absolute; bottom: 36px; left: 0; right: 0; text-align: center; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.4); z-index: 29; pointer-events: none; }
+
+  /* About link in corner */
+  #aboutLink { position: absolute; top: 16px; right: 16px; z-index: 5; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.4); text-decoration: none; padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 999px; background: rgba(0,0,0,0.3); backdrop-filter: blur(6px); }
+  #aboutLink:hover { color: var(--accent); border-color: rgba(56,249,215,0.4); }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="eyebrow">Google I/O 2026 · Hackathon</div>
-  <h1>OmniForm</h1>
-  <div class="tag">Ambient Biomechanics Lab</div>
-  <p class="lede">Hold the button. Move. Release. Get instant kinematic coaching grounded in real biomechanics, voiced by Chirp 3 HD, with a Veo-generated reference clip of you doing it right — all powered end-to-end by the Google AI stack.</p>
-  <div class="pill-row">
-    <span class="pill">Gemini 3.5 Flash</span>
-    <span class="pill">Veo 3.1 Fast</span>
-    <span class="pill">Google ADK</span>
-    <span class="pill">Chirp 3 HD</span>
-    <span class="pill">MediaPipe</span>
-    <span class="pill">Cloud Run</span>
+<main>
+  <a id="aboutLink" href="./about.html">About →</a>
+
+  <video id="webcam" autoplay playsinline muted></video>
+  <canvas id="overlay"></canvas>
+  <div class="vignette"></div>
+
+  <div class="header">
+    <h1>OmniForm</h1>
+    <p>Ambient Biomechanics Lab</p>
   </div>
-  <div style="margin-top: 28px;">
-    <a class="cta primary" href="https://github.com/vnmoorthy/Omniform">View Source on GitHub →</a>
-    <a class="cta secondary" href="#run">Run it Locally</a>
+
+  <div id="hud" class="hidden">
+    <div class="label">Measured</div>
+    <div class="row" id="hudL"></div>
+    <div class="row" id="hudR"></div>
+    <div class="row" id="hudV"></div>
   </div>
-</header>
 
-<div class="wrap">
-
-<section>
-  <h2>The Loop</h2>
-  <p>OmniForm is a single-page web app that turns any device with a camera into a real-time biomechanics coach. There is no text input anywhere — it's just a camera and one glowing button.</p>
-  <ol style="padding-left: 22px; opacity: 0.9;">
-    <li><strong>Stand in frame.</strong> A live cyan skeleton locks onto your body via on-device MediaPipe BlazePose. Knee angles + peak angular velocity stream live to the HUD.</li>
-    <li><strong>Hold the capture button</strong> and perform any movement — a soccer strike, a squat, a walking pattern, a sit-to-stand. The app records 4 seconds of video + audio.</li>
-    <li><strong>Release.</strong> A 4-stage progress indicator (Pose → Physics → Coach → Voice) walks you through the real backend pipeline as Gemini 3.5 Flash analyzes the clip and Veo 3.1 generates a correction reference clip.</li>
-    <li><strong>~15 seconds later</strong> your captured video plays back with server-computed overlay markers (warning rings, force vectors, joint labels) tracking your body via MediaPipe. The Chirp 3 HD voice delivers a two-sentence coaching critique. Then a "Correct-Form Reference" tile slides in with the Veo-generated clip animating <em>you</em> in <em>your</em> setting executing the corrected technique.</li>
-  </ol>
-</section>
-
-<section>
-  <h2>Architecture</h2>
-  <p>Two services, both on Cloud Run. The user's recorded video never persists on the server — it's replayed from the browser's in-memory blob.</p>
-  <div class="arch">┌──────────────────────────────────────────────────────────────────────────┐
-│           User device (Next.js 16 + React 19 + Tailwind v4)              │
-│                                                                          │
-│  Webcam ──▶ MediaPipe BlazePose ──▶ on-device kinematics                 │
-│             (GPU WASM, client-side)        │                             │
-│                                            ▼                             │
-│  Hold capture ─▶ MediaRecorder ─▶ multipart {video, audio, JSON}         │
-│  Release ─▶ canvas first-frame ─▶ base64 ─▶ Veo I2V reference image     │
-└────────────────────────────────────────────┬─────────────────────────────┘
-                                             │ POST /api/analyze
-                                             │ rate-limited · X-Demo-Token · CORS
-                                             ▼
-┌──────────────────────────────────────────────────────────────────────────┐
-│                 Cloud Run · Express backend (Node 20)                    │
-│                                                                          │
-│  Math step  ──▶ @google/genai · Interactions API · multimodal video pass │
-│                  ai.interactions.create({ model: gemini-3.5-flash, ... })│
-│                  → biomechanics findings (Zod-validated)                 │
-│                                                                          │
-│  DirectorAgent ──▶ @google/adk · LlmAgent · structured JSON output       │
-│                    → agentAudioScript                                    │
-│                    → omniVideoPrompt                                     │
-│                    → overlayPlan (joint · color · label · correction)    │
-│                    → correctionVideoPrompt  (the Veo prompt)             │
-│                                                                          │
-│  Cloud Text-to-Speech (Chirp 3 HD · Charon) ──▶ MP3 with TTL sweep       │
-│                                                                          │
-│  /api/correction-clip                                                    │
-│    POST kicks off Veo 3.1 Fast image-to-video (long-running operation)   │
-│    GET ?id= polls until done; backend downloads Gemini Files URI with    │
-│    the API key and serves the mp4 from /public/corrections/&lt;id&gt;.mp4      │
-│                                                                          │
-│  BigQuery-shape JSONL data pipeline · structured Cloud Logging output    │
-└──────────────────────────────────────────────────────────────────────────┘</div>
-</section>
-
-<section>
-  <h2>Google AI Stack</h2>
-  <table class="specs">
-    <tr><td>Multimodal video analysis</td><td><strong>Gemini 3.5 Flash</strong> via <code>@google/genai</code> <strong>Interactions API</strong> — typed steps, multimodal video input, server-side history</td></tr>
-    <tr><td>Agent orchestration</td><td><strong>Google Agent Development Kit (ADK)</strong> — <code>LlmAgent</code> with Zod-validated structured output, <code>Runner.runEphemeral</code>, <code>InMemorySessionService</code></td></tr>
-    <tr><td>Reference-video generation</td><td><strong>Veo 3.1 Fast</strong> (<code>veo-3.1-fast-generate-preview</code>) image-to-video — takes the user's first video frame as the reference so the output animates the <em>same</em> person in the <em>same</em> setting</td></tr>
-    <tr><td>Voiced coaching</td><td><strong>Google Cloud Text-to-Speech · Chirp 3 HD</strong> (<code>en-US-Chirp3-HD-Charon</code>) with browser <code>SpeechSynthesis</code> fallback</td></tr>
-    <tr><td>On-device pose detection</td><td><strong>MediaPipe BlazePose</strong> (<code>@mediapipe/tasks-vision</code>) — GPU-accelerated WASM, never leaves the device</td></tr>
-    <tr><td>Runtime</td><td><strong>Google Cloud Run</strong> (frontend + backend) — serverless, autoscale, graceful SIGTERM drain, non-root containers</td></tr>
-    <tr><td>Observability</td><td><strong>Cloud Logging</strong> via JSON stdout with <code>severity</code> field</td></tr>
-    <tr><td>Secrets</td><td><strong>Secret Manager</strong> bound via <code>--update-secrets</code> (never <code>--set-env-vars</code>)</td></tr>
-    <tr><td>Data flywheel</td><td><strong>BigQuery-shape JSONL</strong> — every analysis writes a row ready for <code>bq load</code></td></tr>
-  </table>
-</section>
-
-<section>
-  <h2>Activity-Agnostic</h2>
-  <p>The Gemini prompts are written to handle <em>any</em> human movement, not just sport skills:</p>
-  <div class="grid">
-    <div class="card"><div class="h">Sport skills</div><p>Soccer strike, jump shot, golf swing, deadlift, sprint, climbing, swim stroke.</p></div>
-    <div class="card"><div class="h">Gait</div><p>Walking, running, stair climb, sit-to-stand, post-injury return-to-walk.</p></div>
-    <div class="card"><div class="h">Posture</div><p>Sitting form, standing alignment, lifting mechanics, overhead carry.</p></div>
-    <div class="card"><div class="h">Rehab / PT</div><p>Range-of-motion work, asymmetric load detection, knee-valgus tracking.</p></div>
+  <div id="welcome">
+    <p class="title">Welcome to OmniForm</p>
+    <p>Stand in frame so the camera can see your full body, then <span style="color:#fff">hold the capture button</span> and perform any movement — a sport skill, a squat, a walk. Release to get instant kinematic coaching.</p>
   </div>
-</section>
 
-<section id="run">
-  <h2>Try It</h2>
-  <p>OmniForm needs a Gemini API key (free tier works) and Node 20. The full live app — Cloud Run + Veo + Chirp 3 HD — deploys in one command.</p>
+  <div id="recBadge" class="hidden"><div class="pill"><span class="dot"></span><span id="recTime">Capturing motion · 4.0s</span></div></div>
 
-  <h3>Run Locally (2 minutes)</h3>
-  <pre><code>git clone https://github.com/vnmoorthy/Omniform.git
-cd Omniform
+  <div id="errorToast" class="hidden"><span>!</span><p id="errorText"></p><button id="errorClose">×</button></div>
 
-# 1. backend
-cd backend
-cp .env.example .env        # add GEMINI_API_KEY (and optionally GOOGLE_TTS_API_KEY)
-npm install
-node --env-file=.env index.js   # http://localhost:8080
-
-# 2. frontend (separate terminal)
-cd frontend
-cp .env.local.example .env.local
-npm install
-npm run dev                  # http://localhost:3000</code></pre>
-
-  <h3>Deploy to Google Cloud Run (5 minutes)</h3>
-  <pre><code># Pre-reqs: gcloud auth login + billing-enabled GCP project +
-# backend/.env populated with GEMINI_API_KEY (and optionally GOOGLE_TTS_API_KEY).
-
-PROJECT_ID=your-project-id ./deploy.sh</code></pre>
-  <p>The script enables APIs, creates Secret Manager entries (<code>omniform-gemini</code>, <code>omniform-tts</code>, <code>omniform-demo-token</code>), deploys both services to Cloud Run, locks the backend's CORS to the frontend URL, and prints the final URLs.</p>
-
-  <div class="demo-note" style="margin-top: 18px;">
-    <strong>Note for judges:</strong> the live Cloud Run deploy needs a Google Cloud project with the Gemini API, Veo, and Cloud Text-to-Speech APIs enabled. The repo includes <code>deploy.sh</code> for a one-command production deploy. To preview the UI without deploying, run the local steps above.
+  <div id="loading" class="hidden">
+    <div class="swarm"></div>
+    <div id="stageBlock">
+      <p id="stageTitle"></p>
+      <p id="stageSubtitle"></p>
+      <div id="stageBar"><div id="stageBarFill"></div></div>
+      <div id="stageTicker">
+        <span data-stage="0">Pose</span>
+        <span data-stage="1">Physics</span>
+        <span data-stage="2">Coach</span>
+        <span data-stage="3">Voice</span>
+      </div>
+    </div>
   </div>
-</section>
 
-<section>
-  <h2>Privacy + Security</h2>
-  <ul>
-    <li><strong>Recorded video never persists on the server.</strong> The result screen plays back the in-memory blob via <code>URL.createObjectURL</code>.</li>
-    <li><strong>Veo correction clips + TTS audio</strong> are held for at most 1 hour, then swept.</li>
-    <li><strong>Metrics are sanitized at the API boundary</strong> — only finite numbers in known ranges pass through, closing the prompt-injection class.</li>
-    <li><strong>Rate-limited</strong> (10 analyses/min/IP, 3 Veo kickoffs/min/IP) and gated by an optional <code>X-Demo-Token</code> shared secret.</li>
-    <li><strong>Non-root</strong> Cloud Run containers, graceful <code>SIGTERM</code> drain, <code>0.0.0.0</code> bind.</li>
-    <li>Full audit in <a href="https://github.com/vnmoorthy/Omniform/blob/main/SECURITY.md">SECURITY.md</a>.</li>
-  </ul>
-</section>
+  <div id="result" class="hidden">
+    <div id="resultVideoWrap">
+      <video id="resultVideo" autoplay loop muted playsinline></video>
+      <canvas id="resultOverlay"></canvas>
+      <div id="resultGradient"></div>
+    </div>
+    <div id="resultPanel">
+      <div class="card">
+        <p class="label">Coaching Feedback</p>
+        <p class="coaching" id="coachingText"></p>
+        <div id="metricsRow" class="meta hidden"></div>
+        <div id="visualPrompt" class="meta hidden"></div>
+        <div id="pipelineMeta" class="meta hidden"></div>
+      </div>
+      <div id="refTile" class="card hidden">
+        <p class="label">Correct-Form Reference · Veo 3.1 Image-to-Video</p>
+        <div id="refStatus">
+          <div id="refSpinner"></div>
+          <div>
+            <div class="text" id="refStatusText">Generating reference clip of the corrected technique…</div>
+            <div class="sub" id="refStatusSub">Veo typically takes 30–60s · 0s elapsed</div>
+          </div>
+        </div>
+        <video id="refVideo" class="hidden" controls autoplay loop muted playsinline></video>
+      </div>
+      <div class="actions">
+        <button id="replayBtn">Replay Audio</button>
+        <button id="resetBtn" class="primary">Analyze Again</button>
+      </div>
+    </div>
+  </div>
 
-<footer>
-  <p>OmniForm · Built for Google I/O 2026 · <a href="https://github.com/vnmoorthy/Omniform">github.com/vnmoorthy/Omniform</a></p>
-</footer>
+  <button id="captureBtn">Analyze
+Motion</button>
+  <p id="captureHint">Hold to capture · Release to analyze</p>
+</main>
 
-</div>
+<script type="module">
+  import { GoogleGenAI, Type } from "https://esm.sh/@google/genai@2.6.0";
+
+  // ============================================================
+  // Configuration — API keys embedded for the live demo.
+  // The hackathon owner accepted this risk; rotate after the event.
+  // ============================================================
+  const GEMINI_API_KEY = "AIzaSyDuIDYg3asfdeJzTLZq56a5PQeMrHhNjHc";
+  const TTS_API_KEY    = "AIzaSyBMa3vDcoIEoo8mjKcUoOmC9sv83H0anbs";
+  const MODEL = "gemini-3.5-flash";
+  const VEO_MODELS = [
+    "veo-3.1-fast-generate-preview",
+    "veo-3.0-generate-001",
+    "veo-2.0-generate-001",
+  ];
+  const TTS_VOICE = "en-US-Chirp3-HD-Charon";
+  const RECORD_MS = 4000;
+
+  const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
+  // ============================================================
+  // Element refs
+  // ============================================================
+  const $ = (id) => document.getElementById(id);
+  const webcamEl = $("webcam");
+  const overlayCanvas = $("overlay");
+  const captureBtn = $("captureBtn");
+  const captureHint = $("captureHint");
+  const recBadge = $("recBadge");
+  const recTime = $("recTime");
+  const welcomeEl = $("welcome");
+  const hudEl = $("hud");
+  const hudL = $("hudL"); const hudR = $("hudR"); const hudV = $("hudV");
+  const errorToast = $("errorToast"); const errorText = $("errorText");
+  const loadingEl = $("loading");
+  const stageTitle = $("stageTitle"); const stageSubtitle = $("stageSubtitle");
+  const stageBarFill = $("stageBarFill"); const stageTickerSpans = document.querySelectorAll("#stageTicker span");
+  const resultEl = $("result");
+  const resultVideo = $("resultVideo");
+  const resultOverlay = $("resultOverlay");
+  const coachingText = $("coachingText");
+  const metricsRow = $("metricsRow");
+  const visualPrompt = $("visualPrompt");
+  const pipelineMeta = $("pipelineMeta");
+  const refTile = $("refTile"); const refStatus = $("refStatus"); const refStatusText = $("refStatusText"); const refStatusSub = $("refStatusSub"); const refVideo = $("refVideo");
+
+  $("errorClose").addEventListener("click", () => errorToast.classList.add("hidden"));
+  $("replayBtn").addEventListener("click", () => { if (currentResult) playCoaching(currentResult); });
+  $("resetBtn").addEventListener("click", reset);
+
+  // Returning users skip the welcome tip
+  if (localStorage.getItem("omniform.hasRecordedOnce") === "1") welcomeEl.classList.add("hidden");
+
+  // ============================================================
+  // State
+  // ============================================================
+  let mediaStream = null;
+  let videoRecorder = null;
+  let videoChunks = [];
+  let recording = false;
+  let autoStopTimer = null;
+  let countdownTimer = null;
+  let stageTimers = [];
+  let currentResult = null;
+  let currentAudio = null;
+  let landmarker = null;
+  let poseConnections = [];
+  let lastLandmarks = null;
+  let liveMetrics = { left: null, right: null, peak: 0 };
+  let prevAngles = { t: 0, left: null, right: null };
+  let activeOverlayPlan = [];
+  let overlayMode = null; // "live" or "result"
+
+  // ============================================================
+  // Stage labels (mirror the backend pipeline phases)
+  // ============================================================
+  const STAGES = [
+    { title: "Detecting pose landmarks",   sub: "MediaPipe · on-device kinetic chain" },
+    { title: "Computing force vectors",    sub: "Gemini 3.5 Flash · multimodal pass" },
+    { title: "Composing coaching analysis",sub: "Structured JSON output" },
+    { title: "Generating reference clip",  sub: "Veo 3.1 Fast · image-to-video" },
+  ];
+
+  // ============================================================
+  // Joint mapping (MediaPipe BlazePose landmark indices)
+  // ============================================================
+  const JOINT_INDEX = { leftHip: 23, rightHip: 24, leftKnee: 25, rightKnee: 26, leftAnkle: 27, rightAnkle: 28 };
+  const OVERLAY_COLORS = {
+    cyan: "rgba(67,229,255,1)", magenta: "rgba(255,67,229,1)", yellow: "rgba(255,229,67,1)",
+  };
+
+  // ============================================================
+  // Camera + MediaPipe init
+  // ============================================================
+  async function initCamera() {
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: true,
+      });
+      webcamEl.srcObject = mediaStream;
+    } catch (err) {
+      showError("Camera permission denied. OmniForm needs camera access to analyze your motion.");
+      throw err;
+    }
+  }
+
+  async function initMediaPipe() {
+    try {
+      const vision = await import("https://esm.sh/@mediapipe/tasks-vision@0.10.35");
+      const { PoseLandmarker, FilesetResolver } = vision;
+      poseConnections = (PoseLandmarker.POSE_CONNECTIONS || []);
+      const fileset = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm");
+      landmarker = await PoseLandmarker.createFromOptions(fileset, {
+        baseOptions: {
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+          delegate: "GPU",
+        },
+        runningMode: "VIDEO",
+        numPoses: 1,
+      });
+      overlayMode = "live";
+      requestAnimationFrame(poseLoop);
+    } catch (err) {
+      console.warn("[OmniForm] Pose model unavailable", err);
+    }
+  }
+
+  function angleAt(a, b, c, vw, vh) {
+    if (!a || !b || !c) return null;
+    const v1x = (a.x - b.x) * vw, v1y = (a.y - b.y) * vh;
+    const v2x = (c.x - b.x) * vw, v2y = (c.y - b.y) * vh;
+    const m1 = Math.hypot(v1x, v1y), m2 = Math.hypot(v2x, v2y);
+    if (!m1 || !m2) return null;
+    let cos = (v1x * v2x + v1y * v2y) / (m1 * m2);
+    cos = Math.max(-1, Math.min(1, cos));
+    return (Math.acos(cos) * 180) / Math.PI;
+  }
+
+  let lastTs = -1;
+  function poseLoop() {
+    requestAnimationFrame(poseLoop);
+    if (!landmarker) return;
+    const video = overlayMode === "result" ? resultVideo : webcamEl;
+    const canvas = overlayMode === "result" ? resultOverlay : overlayCanvas;
+    if (!video || video.readyState < 2 || !video.videoWidth) return;
+    const rect = canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const dpr = window.devicePixelRatio || 1;
+    const W = Math.round(rect.width * dpr), H = Math.round(rect.height * dpr);
+    if (canvas.width !== W || canvas.height !== H) { canvas.width = W; canvas.height = H; }
+    const ctx = canvas.getContext("2d");
+    let ts = performance.now();
+    if (ts <= lastTs) ts = lastTs + 1;
+    lastTs = ts;
+    let result;
+    try { result = landmarker.detectForVideo(video, ts); } catch { return; }
+    ctx.clearRect(0, 0, W, H);
+    const lms = result?.landmarks?.[0]; if (!lms || !lms.length) return;
+    lastLandmarks = lms;
+
+    const vw = video.videoWidth, vh = video.videoHeight;
+    const scale = Math.max(W / vw, H / vh);
+    const offX = (W - vw * scale) / 2, offY = (H - vh * scale) / 2;
+    const mirror = overlayMode === "live";
+    const mapX = (x) => { const px = offX + x * vw * scale; return mirror ? W - px : px; };
+    const mapY = (y) => offY + y * vh * scale;
+    const visible = (p) => (p?.visibility ?? 1) >= 0.3;
+
+    // Skeleton lines
+    ctx.lineCap = "round"; ctx.lineWidth = Math.max(2, 3 * dpr);
+    ctx.shadowBlur = 14 * dpr; ctx.shadowColor = "rgba(67,229,255,0.9)";
+    ctx.strokeStyle = "rgba(67,229,255,0.95)";
+    ctx.beginPath();
+    for (const c of poseConnections) {
+      const a = lms[c.start], b = lms[c.end];
+      if (!visible(a) || !visible(b)) continue;
+      ctx.moveTo(mapX(a.x), mapY(a.y)); ctx.lineTo(mapX(b.x), mapY(b.y));
+    }
+    ctx.stroke();
+
+    // Joint nodes
+    ctx.shadowBlur = 10 * dpr; ctx.fillStyle = "rgba(56,249,215,0.95)";
+    for (const p of lms) {
+      if (!visible(p)) continue;
+      ctx.beginPath(); ctx.arc(mapX(p.x), mapY(p.y), Math.max(2.5, 3.5 * dpr), 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+
+    // Compute angles for HUD
+    const lk = angleAt(lms[23], lms[25], lms[27], vw, vh);
+    const rk = angleAt(lms[24], lms[26], lms[28], vw, vh);
+    if (prevAngles.t > 0) {
+      const dt = (ts - prevAngles.t) / 1000;
+      if (dt > 0) {
+        for (const [cur, pr] of [[lk, prevAngles.left], [rk, prevAngles.right]]) {
+          if (cur != null && pr != null) {
+            const av = Math.abs(cur - pr) / dt;
+            if (isFinite(av) && av < 3000) liveMetrics.peak = Math.max(liveMetrics.peak, av);
+          }
+        }
+      }
+    }
+    prevAngles = { t: ts, left: lk, right: rk };
+    liveMetrics.left = lk != null ? Math.round(lk) : null;
+    liveMetrics.right = rk != null ? Math.round(rk) : null;
+
+    // Update HUD
+    if (overlayMode === "live" && (liveMetrics.left != null || liveMetrics.right != null)) {
+      hudEl.classList.remove("hidden");
+      hudL.textContent = liveMetrics.left != null ? `L knee ${liveMetrics.left}°` : "";
+      hudR.textContent = liveMetrics.right != null ? `R knee ${liveMetrics.right}°` : "";
+      hudV.textContent = liveMetrics.peak > 0 ? `peak ${Math.round(liveMetrics.peak)}°/s` : "";
+    }
+
+    // Draw server-computed overlay plan markers (result screen only)
+    if (overlayMode === "result" && activeOverlayPlan.length) {
+      for (const entry of activeOverlayPlan) {
+        const lm = lms[JOINT_INDEX[entry.joint]];
+        if (!visible(lm)) continue;
+        const x = mapX(lm.x), y = mapY(lm.y);
+        const color = OVERLAY_COLORS[entry.color] || OVERLAY_COLORS.cyan;
+        ctx.save(); ctx.shadowBlur = 18 * dpr; ctx.shadowColor = color; ctx.strokeStyle = color;
+        ctx.lineWidth = Math.max(2.5, 3.5 * dpr);
+        if (entry.treatment === "highlight") {
+          ctx.beginPath(); ctx.arc(x, y, 14 * dpr, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(x, y, 7 * dpr, 0, Math.PI * 2); ctx.stroke();
+        } else if (entry.treatment === "warning") {
+          const s = 13 * dpr;
+          ctx.beginPath(); ctx.moveTo(x, y - s); ctx.lineTo(x - s, y + s); ctx.lineTo(x + s, y + s); ctx.closePath(); ctx.stroke();
+          ctx.lineWidth = Math.max(2, 3 * dpr);
+          ctx.beginPath(); ctx.moveTo(x, y - s * 0.4); ctx.lineTo(x, y + s * 0.2); ctx.stroke();
+        } else { /* vector */
+          const dy = 26 * dpr, head = 7 * dpr;
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + dy); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(x, y + dy); ctx.lineTo(x - head, y + dy - head);
+          ctx.moveTo(x, y + dy); ctx.lineTo(x + head, y + dy - head);
+          ctx.stroke();
+        }
+        if (entry.label) {
+          ctx.shadowBlur = 0; ctx.fillStyle = color; ctx.textAlign = "left";
+          ctx.font = `600 ${Math.max(11, 12 * dpr)}px system-ui, sans-serif`;
+          ctx.fillText(entry.label, x + 18 * dpr, y + 4 * dpr);
+        }
+        ctx.restore();
+      }
+    }
+  }
+
+  // ============================================================
+  // Recording flow
+  // ============================================================
+  function pickMime(candidates) {
+    if (typeof MediaRecorder === "undefined") return undefined;
+    return candidates.find((c) => MediaRecorder.isTypeSupported(c));
+  }
+
+  function startRecord() {
+    if (recording || !mediaStream) return;
+    errorToast.classList.add("hidden");
+    welcomeEl.classList.add("hidden");
+    videoChunks = [];
+    const vmime = pickMime(["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm","video/mp4"]);
+    videoRecorder = new MediaRecorder(mediaStream, vmime ? { mimeType: vmime } : undefined);
+    videoRecorder.ondataavailable = (e) => { if (e.data?.size) videoChunks.push(e.data); };
+    videoRecorder.start();
+    recording = true;
+    captureBtn.classList.add("recording");
+    recBadge.classList.remove("hidden");
+    let t = RECORD_MS / 1000;
+    recTime.textContent = `Capturing motion · ${t.toFixed(1)}s`;
+    countdownTimer = setInterval(() => {
+      t = Math.max(0, +(t - 0.1).toFixed(1));
+      recTime.textContent = `Capturing motion · ${t.toFixed(1)}s`;
+    }, 100);
+    autoStopTimer = setTimeout(stopRecord, RECORD_MS);
+  }
+
+  async function stopRecord() {
+    if (!recording) return;
+    recording = false;
+    if (autoStopTimer) { clearTimeout(autoStopTimer); autoStopTimer = null; }
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    captureBtn.classList.remove("recording");
+    recBadge.classList.add("hidden");
+    localStorage.setItem("omniform.hasRecordedOnce", "1");
+
+    const blob = await new Promise((resolve) => {
+      const vmime = videoRecorder.mimeType?.split(";")[0] || "video/webm";
+      videoRecorder.onstop = () => resolve(new Blob(videoChunks, { type: vmime }));
+      try { videoRecorder.stop(); } catch { resolve(null); }
+    });
+    if (!blob || !blob.size) { showError("No video captured. Try again."); return; }
+    const measured = { ...liveMetrics };
+    await runAnalysis(blob, measured);
+  }
+
+  captureBtn.addEventListener("pointerdown", (e) => { e.currentTarget.setPointerCapture(e.pointerId); startRecord(); });
+  captureBtn.addEventListener("pointerup", stopRecord);
+  captureBtn.addEventListener("pointercancel", stopRecord);
+  captureBtn.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  // ============================================================
+  // Analyze pipeline
+  // ============================================================
+  function showLoading() {
+    loadingEl.classList.remove("hidden");
+    setStage(0);
+    const ms = [2700, 5400, 8100];
+    stageTimers = ms.map((t, i) => setTimeout(() => setStage(i + 1), t));
+  }
+  function clearLoading() {
+    loadingEl.classList.add("hidden");
+    stageTimers.forEach(clearTimeout); stageTimers = [];
+  }
+  function setStage(n) {
+    stageTitle.textContent = STAGES[n].title;
+    stageSubtitle.textContent = STAGES[n].sub;
+    stageBarFill.style.width = `${((n + 1) / STAGES.length) * 100}%`;
+    stageTickerSpans.forEach((s, i) => s.classList.toggle("on", i <= n));
+  }
+
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => { const v = r.result; resolve(typeof v === "string" ? v.split(",")[1] : ""); };
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+  }
+
+  async function extractFirstFrameDataUrl(blob) {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(blob);
+      const v = document.createElement("video");
+      v.muted = true; v.playsInline = true; v.preload = "auto";
+      const fail = () => { URL.revokeObjectURL(url); resolve(null); };
+      v.addEventListener("error", fail, { once: true });
+      v.addEventListener("loadeddata", () => {
+        const MAX_DIM = 480;
+        const w0 = v.videoWidth, h0 = v.videoHeight;
+        if (!w0 || !h0) return fail();
+        const s = Math.min(1, MAX_DIM / Math.max(w0, h0));
+        const w = Math.max(1, Math.round(w0 * s)), h = Math.max(1, Math.round(h0 * s));
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        const ctx = c.getContext("2d"); if (!ctx) return fail();
+        try { ctx.drawImage(v, 0, 0, w, h); const u = c.toDataURL("image/jpeg", 0.8); URL.revokeObjectURL(url); resolve(u); }
+        catch { fail(); }
+      }, { once: true });
+      v.src = url;
+    });
+  }
+
+  function buildGroundingText(m) {
+    if (!m) return "";
+    const bits = [];
+    if (m.left != null) bits.push(`left knee angle ${m.left} degrees`);
+    if (m.right != null) bits.push(`right knee angle ${m.right} degrees`);
+    if (m.peak > 0) bits.push(`peak knee angular velocity ${Math.round(m.peak)} deg/s`);
+    if (!bits.length) return "";
+    return ` Measured on-device via MediaPipe pose estimation: ${bits.join(", ")}. Treat these measured values as ground truth and reference them in your assessment; do not invent contradicting numbers.`;
+  }
+
+  // Structured-output schema (Gemini responseSchema shape)
+  const RESPONSE_SCHEMA = {
+    type: Type.OBJECT,
+    properties: {
+      agentAudioScript:      { type: Type.STRING },
+      omniVideoPrompt:       { type: Type.STRING },
+      overlayPlan: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            joint:     { type: Type.STRING, enum: ["leftHip","rightHip","leftKnee","rightKnee","leftAnkle","rightAnkle"] },
+            treatment: { type: Type.STRING, enum: ["highlight","warning","vector"] },
+            color:     { type: Type.STRING, enum: ["cyan","magenta","yellow"] },
+            label:     { type: Type.STRING },
+          },
+          required: ["joint","treatment","color"],
+        },
+      },
+      correctionVideoPrompt: { type: Type.STRING },
+    },
+    required: ["agentAudioScript","omniVideoPrompt","overlayPlan","correctionVideoPrompt"],
+  };
+
+  const SYSTEM_INSTRUCTION = `You are a human-movement biomechanics engine. Analyze the attached video clip of a person moving — this could be any activity (sport skill, gait, posture, lift, rehab/PT). Detect what movement is being performed, then assess kinetic-chain quality for that movement. Produce a JSON object with: agentAudioScript (1-2 sentences of authoritative coaching addressed to the athlete — reference measured numbers verbatim when present), omniVideoPrompt (description of how an overlay should emphasize joint highlights, ≤80 words), overlayPlan (2-5 entries each with joint ∈ {leftHip,rightHip,leftKnee,rightKnee,leftAnkle,rightAnkle}, treatment ∈ {highlight,warning,vector}, color ∈ {cyan,magenta,yellow}, optional label ≤40 chars — use warning+magenta for asymmetries, highlight+cyan for measured markers, vector+yellow for force/velocity), correctionVideoPrompt (30-150 word Veo image-to-video prompt opening "The same person from the reference frame performs the corrected [activity]: ..." describing the specific corrected biomechanics, cinematic side-profile slow-motion, no text overlays).`;
+
+  async function runAnalysis(videoBlob, measured) {
+    captureBtn.disabled = true; captureHint.textContent = "Processing…";
+    showLoading();
+
+    let result;
+    try {
+      const videoB64 = await blobToBase64(videoBlob);
+      const grounding = buildGroundingText(measured);
+      const resp = await ai.models.generateContent({
+        model: MODEL,
+        contents: [{
+          role: "user",
+          parts: [
+            { text: "Analyze the attached motion clip and respond with ONLY the JSON object defined in the system instruction." + grounding },
+            { inlineData: { mimeType: videoBlob.type || "video/webm", data: videoB64 } },
+          ],
+        }],
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          responseMimeType: "application/json",
+          responseSchema: RESPONSE_SCHEMA,
+          temperature: 0.5,
+        },
+      });
+      const raw = (resp.text ?? "").trim();
+      result = JSON.parse(raw);
+    } catch (err) {
+      console.error("[OmniForm] analyze error", err);
+      clearLoading();
+      showError("Gemini analyze call failed. Check your network or quota and try again.");
+      captureBtn.disabled = false; captureHint.textContent = "Hold to capture · Release to analyze";
+      return;
+    }
+
+    // Extract first frame for Veo I2V (in parallel with rendering result)
+    const firstFrameDataUrl = await extractFirstFrameDataUrl(videoBlob);
+
+    // Render result
+    const videoUrl = URL.createObjectURL(videoBlob);
+    result.videoUrl = videoUrl;
+    result.measured = measured;
+    currentResult = result;
+    renderResult(result);
+    clearLoading();
+
+    // Cloud TTS (best effort, falls back to browser SpeechSynthesis)
+    playCoaching(result);
+
+    // Veo I2V (async, polls in background and updates the tile)
+    kickoffVeo(result.correctionVideoPrompt, firstFrameDataUrl).catch((err) => {
+      console.warn("[OmniForm] Veo failed", err);
+      showRefError(err?.message || String(err));
+    });
+  }
+
+  function renderResult(r) {
+    resultVideo.src = r.videoUrl;
+    coachingText.textContent = r.agentAudioScript;
+
+    // Metrics chips
+    if (r.measured && (r.measured.left != null || r.measured.right != null || r.measured.peak > 0)) {
+      metricsRow.innerHTML = "";
+      if (r.measured.left != null) {
+        const s = document.createElement("span"); s.className = "chip";
+        s.textContent = `L knee ${r.measured.left}°`;
+        metricsRow.appendChild(s);
+      }
+      if (r.measured.right != null) {
+        const s = document.createElement("span"); s.className = "chip";
+        s.textContent = `R knee ${r.measured.right}°`;
+        metricsRow.appendChild(s);
+      }
+      if (r.measured.peak > 0) {
+        const s = document.createElement("span"); s.className = "chip";
+        s.textContent = `peak ${Math.round(r.measured.peak)}°/s`;
+        metricsRow.appendChild(s);
+      }
+      const note = document.createElement("span");
+      note.style.color = "rgba(255,255,255,0.35)"; note.style.padding = "4px 10px";
+      note.textContent = "measured on-device";
+      metricsRow.appendChild(note);
+      metricsRow.classList.remove("hidden");
+    }
+
+    if (r.omniVideoPrompt) {
+      visualPrompt.classList.remove("hidden");
+      visualPrompt.style.fontStyle = "italic";
+      visualPrompt.style.opacity = "0.55";
+      visualPrompt.textContent = "Overlay plan: " + r.omniVideoPrompt;
+    }
+
+    pipelineMeta.classList.remove("hidden");
+    pipelineMeta.textContent = `${MODEL} · client-direct · ${(r.overlayPlan || []).length} markers`;
+
+    activeOverlayPlan = r.overlayPlan || [];
+    overlayMode = "result";
+    refTile.classList.remove("hidden");
+    refStatus.classList.remove("hidden");
+    refVideo.classList.add("hidden");
+    refStatusText.textContent = "Generating reference clip of the corrected technique…";
+
+    resultEl.classList.remove("hidden");
+    captureBtn.classList.add("hidden");
+    captureHint.classList.add("hidden");
+  }
+
+  // ============================================================
+  // Veo I2V — direct browser → @google/genai
+  // ============================================================
+  async function kickoffVeo(prompt, firstFrameDataUrl) {
+    if (!prompt || prompt.length < 10) {
+      showRefError("No correction prompt available.");
+      return;
+    }
+    const startedAt = Date.now();
+    const tickHandle = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      refStatusSub.textContent = `Veo typically takes 30–60s · ${elapsed}s elapsed`;
+    }, 1000);
+
+    let image;
+    if (firstFrameDataUrl) {
+      const m = firstFrameDataUrl.match(/^data:([^;]+);base64,(.*)$/);
+      if (m) image = { imageBytes: m[2], mimeType: m[1] };
+    }
+
+    let operation;
+    let acceptedModel = null;
+    let lastErr;
+    for (const m of VEO_MODELS) {
+      try {
+        operation = await ai.models.generateVideos({
+          model: m,
+          prompt,
+          ...(image ? { image } : {}),
+          config: {
+            numberOfVideos: 1,
+            durationSeconds: 8,
+            aspectRatio: "9:16",
+            personGeneration: "allow_adult",
+            negativePrompt: "text overlays, captions, watermarks, blurry, distorted anatomy",
+          },
+        });
+        acceptedModel = m;
+        break;
+      } catch (err) {
+        lastErr = err;
+        if (!/model|not found|unsupported|invalid|preview|denied/i.test(err?.message || "")) {
+          throw err;
+        }
+      }
+    }
+    if (!operation) {
+      clearInterval(tickHandle);
+      showRefError(lastErr?.message || "No Veo model accepted the request");
+      return;
+    }
+    refStatusSub.textContent = `${acceptedModel} · 0s elapsed`;
+
+    // Poll
+    let fresh = operation;
+    while (!fresh?.done) {
+      await new Promise((r) => setTimeout(r, 5000));
+      try {
+        fresh = await ai.operations.getVideosOperation({ operation: fresh });
+      } catch (err) {
+        console.warn("[OmniForm] Veo poll error", err);
+      }
+    }
+    clearInterval(tickHandle);
+
+    const r = fresh.response;
+    if (r?.raiMediaFilteredCount > 0) {
+      showRefError(`Veo RAI filter blocked the generation: ${(r.raiMediaFilteredReasons || []).join("; ") || "no reason"}`);
+      return;
+    }
+    const generated = r?.generatedVideos?.[0]?.video;
+    const inlineB64 = generated?.videoBytes;
+    const uri = generated?.uri;
+    if (!inlineB64 && !uri) { showRefError("Veo finished but returned no video payload"); return; }
+
+    let videoUrl;
+    if (inlineB64) {
+      const bytes = Uint8Array.from(atob(inlineB64), (c) => c.charCodeAt(0));
+      videoUrl = URL.createObjectURL(new Blob([bytes], { type: generated.mimeType || "video/mp4" }));
+    } else {
+      // Fetch the Gemini Files URI with the API key (browser can authenticate via ?key=)
+      const sep = uri.includes("?") ? "&" : "?";
+      const r2 = await fetch(`${uri}${sep}key=${encodeURIComponent(GEMINI_API_KEY)}`);
+      if (!r2.ok) { showRefError(`Veo URI fetch ${r2.status}`); return; }
+      const blob = await r2.blob();
+      videoUrl = URL.createObjectURL(blob);
+    }
+
+    refStatus.classList.add("hidden");
+    refVideo.src = videoUrl;
+    refVideo.classList.remove("hidden");
+  }
+  function showRefError(msg) {
+    refStatus.innerHTML = `<div class="text" style="color:#ffd1d1">Reference clip unavailable: ${msg}</div>`;
+    refStatus.classList.remove("hidden");
+    refVideo.classList.add("hidden");
+  }
+
+  // ============================================================
+  // Cloud TTS playback (fallback: browser SpeechSynthesis)
+  // ============================================================
+  async function playCoaching(r) {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (currentAudio) { try { currentAudio.pause(); } catch {} currentAudio = null; }
+    if (!r.agentAudioScript) return;
+    try {
+      const resp = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${TTS_API_KEY}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          input: { text: r.agentAudioScript },
+          voice: { languageCode: "en-US", name: TTS_VOICE },
+          audioConfig: { audioEncoding: "MP3", speakingRate: 1.0 },
+        }),
+      });
+      if (!resp.ok) throw new Error("TTS " + resp.status);
+      const data = await resp.json();
+      if (!data.audioContent) throw new Error("no audioContent");
+      const audio = new Audio(`data:audio/mp3;base64,${data.audioContent}`);
+      currentAudio = audio;
+      await audio.play();
+    } catch (err) {
+      console.warn("[OmniForm] Cloud TTS failed, falling back to browser TTS", err);
+      if (window.speechSynthesis) {
+        const u = new SpeechSynthesisUtterance(r.agentAudioScript);
+        u.rate = 1.0;
+        window.speechSynthesis.speak(u);
+      }
+    }
+  }
+
+  // ============================================================
+  // Reset
+  // ============================================================
+  function reset() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    if (currentAudio) { try { currentAudio.pause(); } catch {} currentAudio = null; }
+    if (currentResult?.videoUrl) URL.revokeObjectURL(currentResult.videoUrl);
+    if (refVideo.src?.startsWith("blob:")) URL.revokeObjectURL(refVideo.src);
+    currentResult = null;
+    activeOverlayPlan = [];
+    overlayMode = "live";
+    resultEl.classList.add("hidden");
+    refTile.classList.add("hidden");
+    refStatusSub.textContent = "Veo typically takes 30–60s · 0s elapsed";
+    captureBtn.disabled = false;
+    captureBtn.classList.remove("hidden");
+    captureHint.classList.remove("hidden");
+    captureHint.textContent = "Hold to capture · Release to analyze";
+    metricsRow.classList.add("hidden");
+    visualPrompt.classList.add("hidden");
+    pipelineMeta.classList.add("hidden");
+  }
+
+  // ============================================================
+  // Error UX
+  // ============================================================
+  function showError(msg) {
+    errorText.textContent = msg;
+    errorToast.classList.remove("hidden");
+  }
+
+  // ============================================================
+  // Boot
+  // ============================================================
+  (async () => {
+    await initCamera();
+    await initMediaPipe();
+  })();
+</script>
+
 </body>
 </html>

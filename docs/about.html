@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>OmniForm — Ambient Biomechanics Lab</title>
+<meta name="description" content="Hold-to-capture athletic motion analysis. Gemini 3.5 Flash + Google ADK + Veo 3.1 image-to-video. Camera-and-button UX, no text input, instant kinematic coaching with a generated reference clip of the corrected technique." />
+<meta property="og:title" content="OmniForm — Ambient Biomechanics Lab" />
+<meta property="og:description" content="Real-time human-movement coaching. Gemini 3.5 Flash + Google ADK + Veo 3.1." />
+<style>
+  :root {
+    --bg: #05060a;
+    --panel: #0b0e16;
+    --accent: #38f9d7;
+    --accent2: #43e5ff;
+    --warn: #ff5cc8;
+    --text: #e7edf3;
+    --muted: #9ba3ad;
+    --border: rgba(255,255,255,0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; line-height: 1.55; }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  pre { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+  code { background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; font-size: 0.92em; }
+  pre code { background: transparent; padding: 0; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 28px 22px 80px; }
+  header { display: flex; flex-direction: column; align-items: center; padding: 56px 22px 28px; text-align: center; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  h1 { font-size: clamp(34px, 6vw, 56px); margin: 14px 0 8px; font-weight: 700; letter-spacing: -0.02em; background: linear-gradient(120deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tag { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); }
+  .lede { max-width: 640px; margin: 22px auto 8px; font-size: 17px; color: var(--text); opacity: 0.92; }
+  .pill-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 22px; }
+  .pill { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); border: 1px solid rgba(56,249,215,0.4); background: rgba(56,249,215,0.06); padding: 6px 12px; border-radius: 999px; }
+  .cta { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 999px; font-weight: 600; font-size: 14px; margin: 8px 4px; transition: opacity .15s; }
+  .cta.primary { background: linear-gradient(120deg, var(--accent), var(--accent2)); color: #05060a; }
+  .cta.secondary { background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: var(--text); }
+  .cta:hover { opacity: 0.9; text-decoration: none; }
+  section { padding: 40px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 22px; margin: 0 0 14px; font-weight: 600; letter-spacing: -0.01em; }
+  h3 { font-size: 14px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin: 24px 0 8px; }
+  p { color: var(--text); opacity: 0.86; margin: 0 0 12px; }
+  ul { margin: 0 0 12px; padding-left: 20px; color: var(--text); opacity: 0.88; }
+  ul li { margin-bottom: 6px; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin-top: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+  .card .h { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .card p { font-size: 14px; margin: 0; opacity: 0.85; }
+  .arch { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; font-size: 12px; line-height: 1.5; white-space: pre; overflow-x: auto; color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .demo-note { background: rgba(67, 229, 255, 0.06); border: 1px solid rgba(67, 229, 255, 0.25); border-radius: 12px; padding: 14px 16px; font-size: 14px; }
+  footer { padding: 32px 0 12px; text-align: center; color: var(--muted); font-size: 12px; }
+  footer a { color: var(--muted); }
+  table.specs { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+  table.specs td { padding: 8px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.specs td:first-child { color: var(--muted); width: 38%; padding-right: 14px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Google I/O 2026 · Hackathon</div>
+  <h1>OmniForm</h1>
+  <div class="tag">Ambient Biomechanics Lab</div>
+  <p class="lede">Hold the button. Move. Release. Get instant kinematic coaching grounded in real biomechanics, voiced by Chirp 3 HD, with a Veo-generated reference clip of you doing it right — all powered end-to-end by the Google AI stack.</p>
+  <div class="pill-row">
+    <span class="pill">Gemini 3.5 Flash</span>
+    <span class="pill">Veo 3.1 Fast</span>
+    <span class="pill">Google ADK</span>
+    <span class="pill">Chirp 3 HD</span>
+    <span class="pill">MediaPipe</span>
+    <span class="pill">Cloud Run</span>
+  </div>
+  <div style="margin-top: 28px;">
+    <a class="cta primary" href="./">▶ Open Live App (camera + analyze)</a>
+    <a class="cta secondary" href="https://github.com/vnmoorthy/Omniform">Source on GitHub</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <h2>The Loop</h2>
+  <p>OmniForm is a single-page web app that turns any device with a camera into a real-time biomechanics coach. There is no text input anywhere — it's just a camera and one glowing button.</p>
+  <ol style="padding-left: 22px; opacity: 0.9;">
+    <li><strong>Stand in frame.</strong> A live cyan skeleton locks onto your body via on-device MediaPipe BlazePose. Knee angles + peak angular velocity stream live to the HUD.</li>
+    <li><strong>Hold the capture button</strong> and perform any movement — a soccer strike, a squat, a walking pattern, a sit-to-stand. The app records 4 seconds of video + audio.</li>
+    <li><strong>Release.</strong> A 4-stage progress indicator (Pose → Physics → Coach → Voice) walks you through the real backend pipeline as Gemini 3.5 Flash analyzes the clip and Veo 3.1 generates a correction reference clip.</li>
+    <li><strong>~15 seconds later</strong> your captured video plays back with server-computed overlay markers (warning rings, force vectors, joint labels) tracking your body via MediaPipe. The Chirp 3 HD voice delivers a two-sentence coaching critique. Then a "Correct-Form Reference" tile slides in with the Veo-generated clip animating <em>you</em> in <em>your</em> setting executing the corrected technique.</li>
+  </ol>
+</section>
+
+<section>
+  <h2>Architecture</h2>
+  <p>Two services, both on Cloud Run. The user's recorded video never persists on the server — it's replayed from the browser's in-memory blob.</p>
+  <div class="arch">┌──────────────────────────────────────────────────────────────────────────┐
+│           User device (Next.js 16 + React 19 + Tailwind v4)              │
+│                                                                          │
+│  Webcam ──▶ MediaPipe BlazePose ──▶ on-device kinematics                 │
+│             (GPU WASM, client-side)        │                             │
+│                                            ▼                             │
+│  Hold capture ─▶ MediaRecorder ─▶ multipart {video, audio, JSON}         │
+│  Release ─▶ canvas first-frame ─▶ base64 ─▶ Veo I2V reference image     │
+└────────────────────────────────────────────┬─────────────────────────────┘
+                                             │ POST /api/analyze
+                                             │ rate-limited · X-Demo-Token · CORS
+                                             ▼
+┌──────────────────────────────────────────────────────────────────────────┐
+│                 Cloud Run · Express backend (Node 20)                    │
+│                                                                          │
+│  Math step  ──▶ @google/genai · Interactions API · multimodal video pass │
+│                  ai.interactions.create({ model: gemini-3.5-flash, ... })│
+│                  → biomechanics findings (Zod-validated)                 │
+│                                                                          │
+│  DirectorAgent ──▶ @google/adk · LlmAgent · structured JSON output       │
+│                    → agentAudioScript                                    │
+│                    → omniVideoPrompt                                     │
+│                    → overlayPlan (joint · color · label · correction)    │
+│                    → correctionVideoPrompt  (the Veo prompt)             │
+│                                                                          │
+│  Cloud Text-to-Speech (Chirp 3 HD · Charon) ──▶ MP3 with TTL sweep       │
+│                                                                          │
+│  /api/correction-clip                                                    │
+│    POST kicks off Veo 3.1 Fast image-to-video (long-running operation)   │
+│    GET ?id= polls until done; backend downloads Gemini Files URI with    │
+│    the API key and serves the mp4 from /public/corrections/&lt;id&gt;.mp4      │
+│                                                                          │
+│  BigQuery-shape JSONL data pipeline · structured Cloud Logging output    │
+└──────────────────────────────────────────────────────────────────────────┘</div>
+</section>
+
+<section>
+  <h2>Google AI Stack</h2>
+  <table class="specs">
+    <tr><td>Multimodal video analysis</td><td><strong>Gemini 3.5 Flash</strong> via <code>@google/genai</code> <strong>Interactions API</strong> — typed steps, multimodal video input, server-side history</td></tr>
+    <tr><td>Agent orchestration</td><td><strong>Google Agent Development Kit (ADK)</strong> — <code>LlmAgent</code> with Zod-validated structured output, <code>Runner.runEphemeral</code>, <code>InMemorySessionService</code></td></tr>
+    <tr><td>Reference-video generation</td><td><strong>Veo 3.1 Fast</strong> (<code>veo-3.1-fast-generate-preview</code>) image-to-video — takes the user's first video frame as the reference so the output animates the <em>same</em> person in the <em>same</em> setting</td></tr>
+    <tr><td>Voiced coaching</td><td><strong>Google Cloud Text-to-Speech · Chirp 3 HD</strong> (<code>en-US-Chirp3-HD-Charon</code>) with browser <code>SpeechSynthesis</code> fallback</td></tr>
+    <tr><td>On-device pose detection</td><td><strong>MediaPipe BlazePose</strong> (<code>@mediapipe/tasks-vision</code>) — GPU-accelerated WASM, never leaves the device</td></tr>
+    <tr><td>Runtime</td><td><strong>Google Cloud Run</strong> (frontend + backend) — serverless, autoscale, graceful SIGTERM drain, non-root containers</td></tr>
+    <tr><td>Observability</td><td><strong>Cloud Logging</strong> via JSON stdout with <code>severity</code> field</td></tr>
+    <tr><td>Secrets</td><td><strong>Secret Manager</strong> bound via <code>--update-secrets</code> (never <code>--set-env-vars</code>)</td></tr>
+    <tr><td>Data flywheel</td><td><strong>BigQuery-shape JSONL</strong> — every analysis writes a row ready for <code>bq load</code></td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>Activity-Agnostic</h2>
+  <p>The Gemini prompts are written to handle <em>any</em> human movement, not just sport skills:</p>
+  <div class="grid">
+    <div class="card"><div class="h">Sport skills</div><p>Soccer strike, jump shot, golf swing, deadlift, sprint, climbing, swim stroke.</p></div>
+    <div class="card"><div class="h">Gait</div><p>Walking, running, stair climb, sit-to-stand, post-injury return-to-walk.</p></div>
+    <div class="card"><div class="h">Posture</div><p>Sitting form, standing alignment, lifting mechanics, overhead carry.</p></div>
+    <div class="card"><div class="h">Rehab / PT</div><p>Range-of-motion work, asymmetric load detection, knee-valgus tracking.</p></div>
+  </div>
+</section>
+
+<section id="run">
+  <h2>Try It</h2>
+  <p>OmniForm needs a Gemini API key (free tier works) and Node 20. The full live app — Cloud Run + Veo + Chirp 3 HD — deploys in one command.</p>
+
+  <h3>Run Locally (2 minutes)</h3>
+  <pre><code>git clone https://github.com/vnmoorthy/Omniform.git
+cd Omniform
+
+# 1. backend
+cd backend
+cp .env.example .env        # add GEMINI_API_KEY (and optionally GOOGLE_TTS_API_KEY)
+npm install
+node --env-file=.env index.js   # http://localhost:8080
+
+# 2. frontend (separate terminal)
+cd frontend
+cp .env.local.example .env.local
+npm install
+npm run dev                  # http://localhost:3000</code></pre>
+
+  <h3>Deploy to Google Cloud Run (5 minutes)</h3>
+  <pre><code># Pre-reqs: gcloud auth login + billing-enabled GCP project +
+# backend/.env populated with GEMINI_API_KEY (and optionally GOOGLE_TTS_API_KEY).
+
+PROJECT_ID=your-project-id ./deploy.sh</code></pre>
+  <p>The script enables APIs, creates Secret Manager entries (<code>omniform-gemini</code>, <code>omniform-tts</code>, <code>omniform-demo-token</code>), deploys both services to Cloud Run, locks the backend's CORS to the frontend URL, and prints the final URLs.</p>
+
+  <div class="demo-note" style="margin-top: 18px;">
+    <strong>Note for judges:</strong> the live Cloud Run deploy needs a Google Cloud project with the Gemini API, Veo, and Cloud Text-to-Speech APIs enabled. The repo includes <code>deploy.sh</code> for a one-command production deploy. To preview the UI without deploying, run the local steps above.
+  </div>
+</section>
+
+<section>
+  <h2>Privacy + Security</h2>
+  <ul>
+    <li><strong>Recorded video never persists on the server.</strong> The result screen plays back the in-memory blob via <code>URL.createObjectURL</code>.</li>
+    <li><strong>Veo correction clips + TTS audio</strong> are held for at most 1 hour, then swept.</li>
+    <li><strong>Metrics are sanitized at the API boundary</strong> — only finite numbers in known ranges pass through, closing the prompt-injection class.</li>
+    <li><strong>Rate-limited</strong> (10 analyses/min/IP, 3 Veo kickoffs/min/IP) and gated by an optional <code>X-Demo-Token</code> shared secret.</li>
+    <li><strong>Non-root</strong> Cloud Run containers, graceful <code>SIGTERM</code> drain, <code>0.0.0.0</code> bind.</li>
+    <li>Full audit in <a href="https://github.com/vnmoorthy/Omniform/blob/main/SECURITY.md">SECURITY.md</a>.</li>
+  </ul>
+</section>
+
+<footer>
+  <p>OmniForm · Built for Google I/O 2026 · <a href="https://github.com/vnmoorthy/Omniform">github.com/vnmoorthy/Omniform</a></p>
+</footer>
+
+</div>
+</body>
+</html>
